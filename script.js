@@ -15,6 +15,7 @@ function makeCarre(){
 	Nvcarre = document.createElement("div");
 	Nvcarre.setAttribute("class", "carre");
 	Nvcarre.style.top = 50*shapes.length + 50 +"px";
+	//L'attribut left doit être initialisé/créé avant d'être utilisé dans move.
 	Nvcarre.style.left = 0;
 	shapes.push(Nvcarre); 
 	document.body.appendChild(Nvcarre);
@@ -39,11 +40,35 @@ function move(){
 	}
 }
 
+//Fonction à executer tous les dixièmes de secondes.
 function actionCompteur(){
 	var elem = document.getElementById("chrono");
 	elem.innerHTML = dixieme/10;
 	dixieme++;
 	move();
 }
-
+//On lance le compteur, et donc l'animation.
 compteID = setInterval(actionCompteur,100);
+//=========================================================
+//Fonction permettant d'arrêter le compteur
+function stop(){
+	clearInterval(compteID);
+}
+
+//Fonction permettant de relancer le compteur
+function resume(){
+	/*Pour éviter que le compteur soit relancé si l'utilisateur appuie
+	deux fois de suite sur le boutton Resume, on arrête(éventuellement) 
+	le compteur avant de le relancer.
+	*/
+	clearInterval(compteID);
+	compteID = setInterval(actionCompteur,100);
+}
+
+//Fonction permettant d'effacer le dernier carré de la colonne.
+function erase(){
+	if(shapes.length>0){
+		document.body.removeChild(shapes[shapes.length-1]);
+		shapes.splice(-1,1);
+	}
+}
