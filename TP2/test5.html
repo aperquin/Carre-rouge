@@ -1,0 +1,62 @@
+<html>
+	<head>
+		<title>Test 5</title>
+		<style>
+			#animatedElem{
+				background-color : red;
+				width : 50px;
+				height : 50px;
+				position : absolute;
+				top : 50px;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div id="animatedElem"></div>
+		<button id="10fps">10 fps</button>
+		<button id="20fps">20 fps</button>
+		<button id="30fps">30 fps</button>
+		<button id="40fps">40 fps</button>
+		<button id="50fps">50 fps</button>
+		<button id="60fps">60 fps</button>
+	</body>
+	
+	<script type="text/javascript">
+		window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+									  window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+		var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+									 
+		var elem = document.getElementById("animatedElem");
+		var left = 0;
+		var fps = 60;
+
+		function step() {
+			//On décale le carré d'un nombre de pixel relatif au nombre de fps car
+			//l'animation doit avoir la même durée, peu importe le nombre de fps.
+			elem.style.left = ( left += 10*60/fps ) + "px";
+			if ( left >= 400 ) {
+				cancelAnimationFrame(ID);
+			}
+			else{
+				//On fait varier le framerate (pour 60fps, pas d'attente):
+				setTimeout(function(){ID = requestAnimationFrame(step);},1000/fps-1000/60);
+			}
+		}
+
+		//lance l'animation avec le nombre de fps souhaités par l'utilisateur
+		document.getElementById("10fps").addEventListener("click", function(){left=0; fps=10; var ID = requestAnimationFrame(step);});
+		document.getElementById("20fps").addEventListener("click", function(){left=0; fps=20; var ID = requestAnimationFrame(step);});
+		document.getElementById("30fps").addEventListener("click", function(){left=0; fps=30; var ID = requestAnimationFrame(step);});
+		document.getElementById("40fps").addEventListener("click", function(){left=0; fps=40; var ID = requestAnimationFrame(step);});
+		document.getElementById("50fps").addEventListener("click", function(){left=0; fps=50; var ID = requestAnimationFrame(step);});
+		document.getElementById("60fps").addEventListener("click", function(){left=0; fps=60; var ID = requestAnimationFrame(step);});
+
+		//lancement de l'animation au chargement de la page
+		var ID = requestAnimationFrame(step);
+
+
+		//60 fps <=> 1 frame toutes les 1000/60(16) ms.
+		//X fps <=> 1 frame toutes les 1000/X ms.
+	</script>
+</html>
