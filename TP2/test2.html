@@ -1,0 +1,39 @@
+<html>
+	<head>
+		<title>Test 2</title>
+		<style>
+			#animatedElem{
+				background-color : red;
+				width : 50px;
+				height : 50px;
+				position : absolute;
+				top : 50px;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div id="animatedElem"></div>
+	</body>
+	
+	<script type="text/javascript">
+		var elem = document.getElementById("animatedElem");
+		var left = 0;
+		var timer;
+		var dateDernierExec = new Date();
+		// Move the element 10px on the right every 16ms
+		timer = setInterval(function() {
+			var now = new Date();
+			var delay = now - dateDernierExec;
+			dateDernierExec = now;
+			//on déplace le carré d'un nombre de pixels proportionnels
+			//au temps écoulé entre deux raffraichissements.
+			elem.style.left = ( left += delay*10/16) + "px";			
+			// clear the timer at 400px to stop the animation
+			if ( left > 400 ) {
+				clearInterval( timer );
+			}
+		}, 16);
+
+	</script>
+</html>
