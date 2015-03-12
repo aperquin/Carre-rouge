@@ -1,0 +1,42 @@
+<html>
+	<head>
+		<title>Test 3</title>
+		<style>
+			#animatedElem{
+				background-color : red;
+				width : 50px;
+				height : 50px;
+				position : absolute;
+				top : 50px;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div id="animatedElem"></div>
+	</body>
+	
+	<script type="text/javascript">
+		window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+									  window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+		var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+									 
+		var elem = document.getElementById("animatedElem");
+		var left = 0;
+		var ID;
+		//déplace le carré de 10 pixels vers la droite chaque frame
+		function step() {
+			elem.style.left = ( left += 10 ) + "px";
+			if ( left >= 400 ) {
+				cancelAnimationFrame(ID);
+			}
+			else{
+				ID = requestAnimationFrame(step);
+			}
+		}
+
+		//lancement de l'animation
+		ID = requestAnimationFrame(step);
+
+	</script>
+</html>
