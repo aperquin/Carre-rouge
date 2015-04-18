@@ -8,8 +8,7 @@ var animFrame = window.requestAnimationFrame ||
 var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
             
 var loop;
-var pause = false;
-var gameover = false;
+
 var tics = 0;
 var _timeToBeAlive = 30;
 
@@ -33,14 +32,14 @@ var backgroundHeight = 600;
 ///////////////////////////////////
 //Keys
 var keys = {
-	LEFT: 37,
+	 LEFT: 37,
     UP: 38,
     RIGHT: 39,
     DOWN: 40,
     SPACE: 32,
     ENTER: 13
 };
-	
+
 var keyStatus = {};
 
 function keyDownHandler(event) {
@@ -64,6 +63,7 @@ function keyUpHandler(event) {
         
     }
 ///////////////////////////////////
+
 
 ///////////////////
 // une collection de projectiles
@@ -105,6 +105,7 @@ function ProjectileSet(tabTarget){
     this.tabProjectiles.map(function(obj){
         obj.draw();
     });
+     //console.log(this.tabProjectiles.length);
  };
     
 };
@@ -194,7 +195,7 @@ var enemies = {
     
 };
 //test
-function Enemy(x,y,speed,type){
+function Enemy(x,y,speed){
     this.x = x;
     this.yOrigine = y;
     this.y = this.yOrigine;
@@ -202,9 +203,8 @@ function Enemy(x,y,speed,type){
     this.exists = true;
     this.height = 30;
     this.width = 40;
-	this.type = type;
     this.img = new Image();
-    this.img.src = "./assets/Enemy/HueShifted/eSpritesheet_40x30_hue"+type+".png";
+    this.img.src = "./assets/Enemy/eSpritesheet_40x30.png";
     this.cpt = 0;
 
     this.cptExplosion =  0;//10 images
@@ -255,17 +255,7 @@ function Enemy(x,y,speed,type){
     this.update = function(){
        if(this.cptExplosion==0){//is not exploding
             this.x +=   this.xSpeed ;
-			switch(this.type){
-				case 1:
-					this.y = this.yOrigine+ ArenaHeight/3 * Math.sin(this.x / 100);
-					break;
-				case 2:
-					this.y = this.yOrigine+ ArenaHeight/10 * Math.sin(this.x / 25);
-					break;
-				case 3:
-					this.y = this.yOrigine+ ArenaHeight/3 * Math.log(this.x / 100);
-					break;
-			}
+            this.y = this.yOrigine+ ArenaHeight/3 * Math.sin(this.x / 100);
             var tmp = this.collision([player]);
                 if(tmp != null){
                     tmp.explodes();
@@ -275,7 +265,7 @@ function Enemy(x,y,speed,type){
             if(tics % 5 == 1) {
                     this.cpt = (this.cpt + 1) % 6;
             }
-            if(tics % 50 == 1) this.fire();
+            //if(tics % 50 == 1) this.fire();
        }else{
             if(tics % 3 == 1) {
                 this.cptExplosion++;
@@ -290,105 +280,6 @@ function Enemy(x,y,speed,type){
 }
 /////////////////////////////////
 
-var powerUps = {
-    init : function(){
-        this.tabPowerUps = new Array();
-    },
-    add : function (powerUp) {
-        this.tabPowerUps.push(powerUp);  
-    },
-    remove : function () {  
-        this.tabPowerUps.map(function(obj,index,array){
-            if(obj.exists == false ||obj.x >ArenaWidth || obj.x<0){
-                  delete array[index];
-            }
-        });
-    },
-    draw : function(){ 
-        this.tabPowerUps.map(function(obj){
-            obj.draw();
-        });
-    },
-    clear : function(){
-       this.tabPowerUps.map(function(obj){
-            obj.clear();
-        });
-    },
-    update : function(){
-
-        this.tabPowerUps.map(function(obj){
-            obj.update();
-        });
-         this.remove();
-    }
-    
-};
-
-
-function PowerUp(x,y,speed,type){
-    this.x = x;
-    this.yOrigine = y;
-    this.y = this.yOrigine;
-    this.xSpeed = speed;
-    this.exists = true;
-    this.height = 30;
-    this.width = 40;
-    this.img = new Image();
-    this.img.src = "./assets/PowerUps/power"+type+".png";
-    this.cpt = 0;
-	this.type = type; //type du powerUp.
-
-    this.collision = function(tabOfObjects){
-        var hits = null;
-        var index;
-        for(index in tabOfObjects){
-            if (this.x < tabOfObjects[index].x + tabOfObjects[index].width &&
-                this.x + this.width > tabOfObjects[index].x &&
-                this.y < tabOfObjects[index].y + tabOfObjects[index].height &&
-                this.height + this.y > tabOfObjects[index].y) {
-                    // collision detected!
-                    hits = tabOfObjects[index];
-                    break;
-            }
-        }
-        return hits;
-    };
-
-    this.draw = function(){ 
-
-            conArena.drawImage(this.img,  0,0,125,125, this.x,this.y,this.width,this.height);
-        
-    };
-    this.clear = function(){
-        if(this.exists){
-            conArena.clearRect(this.x,this.y,this.width,this.height);
-        }
-    };
-    this.update = function(){
-            this.x +=   this.xSpeed ;
-            this.y = this.yOrigine;
-            var tmp = this.collision([player]);
-                if(tmp != null){
-					switch (this.type) {
-						case 1 : //améliore la vitesse du vaisseau.
-							console.log("vitesse !");
-							player.xSpeed *= 1.5;
-							player.ySpeed *= 1.5;
-							break;
-						case 2 : // vie en plus.
-							console.log("vie !");
-							player.nbOfLives ++;
-							break;
-						case 3 : // tire plus vite.
-							console.log("tirs !");
-							player.fireRate /= 1.5;
-							break;
-					}
-                    this.exists = false;
-                }
-    };
-}
-
 /////////////////////////////////
 // Hero Player
 var player = {
@@ -402,7 +293,6 @@ var player = {
         this.imgExplosionWidth = 128;
         this.imgExplosion.src = "./assets/Explosion/explosionSpritesheet_1280x128.png";
         this.projectileSet = new ProjectileSet();
-		this.fireRate = 10; //Temps entre chaque tir.
     },
     x : 20,
     ySpeed : 5,
@@ -415,9 +305,9 @@ var player = {
     timeToFire : 0,
     fires : function(){
     	if(this.timeToFire <= 0){
-        var tmp = new Projectile(this.x+this.width,this.y+this.height/2,10,10,3,"rgb(200,0,0)");
+        var tmp = new Projectile(this.x+this.width,this.y+this.height/2,4,10,3,"rgb(200,0,0)");
         this.projectileSet.add(tmp);
-        this.timeToFire = this.fireRate;
+        this.timeToFire = 10;
 		}
 		else{
 			this.timeToFire --;
@@ -505,14 +395,9 @@ function updateItems() {
      if(tics % 100 == 1) {
          var rand = Math.floor(Math.random() * ArenaHeight);
 
-        enemies.add(new Enemy(ArenaWidth, rand,-2,rand%3+1));
+        enemies.add(new Enemy(ArenaWidth, rand,-2));
     }
-	if(tics % 500 == 1){
-		var rand = Math.floor(Math.random() * ArenaHeight);
-		powerUps.add(new PowerUp(ArenaWidth,rand,-2,rand%3+1));
-	}
     enemies.update();
-	powerUps.update();
 }
 function drawScene() {
     "use strict"; 
@@ -522,13 +407,11 @@ function drawItems() {
     "use strict"; 
     player.draw();
     enemies.draw();
-	powerUps.draw();
 }
 function clearItems() {
     "use strict"; 
     player.clear(); 
     enemies.clear();
-	powerUps.clear();
 }
 
 function clearScore() {
@@ -539,27 +422,13 @@ function drawScore() {
     conScore.fillText("score : "+player.projectileSet.score, 150,25);
 }
 function gameOver(){
-	gameover = true;
 	clearScore();
 	conScore.fillText("Game Over !", 175, 175);
 }
 function updateGame() {
     "use strict"; 
-	//On update le jeu s'il n'est pas en pause ou qu'il n'y a pas gameover,
-	if(!pause){
-		updateScene();
-		updateItems();
-	}
-	//puis on vérifie l'état de la pause et du gameover.
-	if(keyStatus[keys.ENTER] == true) {
-							if(!pause){
-							pause = true;
-						}
-							else {
-								pause = false;
-							}
-						}
-						keyStatus[keys.ENTER] = false;
+    updateScene();
+    updateItems();
 }
 function clearGame() {
     "use strict"; 
@@ -583,15 +452,10 @@ function mainloop () {
 }
 
 function recursiveAnim () {
-    "use strict"
+    "use strict"; 
     mainloop();
-    loop = animFrame( recursiveAnim );
-	if(gameover) cancelAnimationFrame(loop);
-}
-
-function restart(){
-	clearGame();
-	init();
+    if(player.nbOfLives > 0){loop = animFrame( recursiveAnim );}
+    else {cancelAnimationFrame(loop);}
 }
  
 function init() {
@@ -616,7 +480,6 @@ function init() {
  
     player.init();
     enemies.init();
-	powerUps.init();
     
 window.addEventListener("keydown", keyDownHandler, false);
 window.addEventListener("keyup", keyUpHandler, false);
