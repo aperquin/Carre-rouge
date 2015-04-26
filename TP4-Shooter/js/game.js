@@ -8,7 +8,7 @@ var animFrame = window.requestAnimationFrame ||
 var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
             
 var loop;
-var pause = false;
+var pause = true; //Le jeu commence en état de pause.
 var gameover = false;
 var tics = 0;
 var _timeToBeAlive = 30;
@@ -202,6 +202,7 @@ function Enemy(x,y,speed,type){
     this.exists = true;
     this.height = 30;
     this.width = 40;
+    this.life = type;
 	this.type = type;
     this.img = new Image();
     this.img.src = "./assets/Enemy/HueShifted/eSpritesheet_40x30_hue"+type+".png";
@@ -215,7 +216,8 @@ function Enemy(x,y,speed,type){
 
     this.projectileSet = new ProjectileSet();
     this.explodes = function(){
-        this.cptExplosion = 1;
+    		this.life --;
+    		if (this.life<=0) this.cptExplosion = 1;
     };
     this.collision = function(tabOfObjects){
         var hits = null;
@@ -393,8 +395,11 @@ function PowerUp(x,y,speed,type){
 // Hero Player
 var player = {
     init : function(){
+		//Déclarations de canvas offscreen pour précharger les différentes étapes de l'animation du vaisseau:
+		this.offscreenCanvas = [];
         this.img = new Image();
         this.img.src = "./assets/Ship/Spritesheet_64x29.png";
+		this.img.onload = offScreenCreate(player);
         this.cpt = 0;
         this.cptExplosion =  10;//10 images
         this.imgExplosion = new Image();
@@ -402,7 +407,7 @@ var player = {
         this.imgExplosionWidth = 128;
         this.imgExplosion.src = "./assets/Explosion/explosionSpritesheet_1280x128.png";
         this.projectileSet = new ProjectileSet();
-		this.fireRate = 10; //Temps entre chaque tir.
+		this.fireRate = 10; //Temps entre chaque tir.		  
     },
     x : 20,
     ySpeed : 5,
@@ -471,6 +476,7 @@ var player = {
                         this.fires();
                     }
                 }
+			//Une touche restée pressée n'est pas acquittée afin d'avoir un mouvement plus fluide et un tir continu:
              //keyStatus[keycode] = false;
             }
         }
@@ -479,7 +485,8 @@ var player = {
     draw : function(){
         if(this.timeToBeAlive == 0) {
 
-            conArena.drawImage(this.img, 0,this.cpt*this.height,this.width,this.height, this.x,this.y,this.width,this.height);
+            //conArena.drawImage(this.img, 0,this.cpt*this.height,this.width,this.height, this.x,this.y,this.width,this.height);
+            conArena.drawImage(this.offscreenCanvas[this.cpt],this.x,this.y);
         }else{
             //exploding
             if(this.cptExplosion!=0){
@@ -502,12 +509,12 @@ function updateItems() {
     "use strict"; 
     player.update();
     tics++;
-     if(tics % 100 == 1) {
+     if(tics % 100 == 5) {
          var rand = Math.floor(Math.random() * ArenaHeight);
 
         enemies.add(new Enemy(ArenaWidth, rand,-2,rand%3+1));
     }
-	if(tics % 500 == 1){
+	if(tics % 500 == 10){
 		var rand = Math.floor(Math.random() * ArenaHeight);
 		powerUps.add(new PowerUp(ArenaWidth,rand,-2,rand%3+1));
 	}
@@ -626,3 +633,16 @@ window.addEventListener("keyup", keyUpHandler, false);
 }
 
 window.addEventListener("load", init, false);
+
+function offScreenCreate(object){
+	var tempCanvas,tempCtx;
+		  for(i=0;i<4;i++){
+			  tempCanvas = document.createElement("canvas");
+			  tempCanvas.setAttribute("id", "offscreenCanvas"+i);
+			  tempCanvas.setAttribute("height", object.height);
+		 	  tempCanvas.setAttribute("width", object.width);
+		 	  tempCtx = tempCanvas.getContext("2d");
+		 	  tempCtx.drawImage(object.img, 0,i*object.height,object.width,object.height, 0,0,object.width,object.height)
+			  object.offscreenCanvas.push(tempCanvas);
+		  }
+}
