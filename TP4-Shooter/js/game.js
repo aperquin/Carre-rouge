@@ -159,6 +159,79 @@ function Projectile(x,y,speed,width,height,color){
 /////////////////////////////////
 
 /////////////////////////////////
+//Creation d'un tableau offScreen commun aux 3 types d'ennemis.
+//Cette version bouclée ne marche pas : tous les ennemis ont la meme image.
+//En effet, tous les onload prennent en compte le dernier tempEnemyImage créé.
+/*var tabOffScreenCanvasEnemy = []
+for(i=0; i<3; i++){
+	var tempEnemyImage;
+	tempEnemyImage = new Image();
+	var p = i+1;
+
+	tempEnemyImage.src = "./assets/Enemy/HueShifted/eSpritesheet_40x30_hue"+p+".png";
+	tempEnemyImage.onload = function(){
+		console.log(tempEnemyImage);
+		  	for(j=0;j<6;j++){
+		  	  var tempCanvas,tempCtx;
+			  tempCanvas = document.createElement("canvas");
+			  tempCanvas.setAttribute("id", "offscreenCanvas"+j);
+			  tempCanvas.setAttribute("height", 30);
+		 	  tempCanvas.setAttribute("width", 40);
+		 	  tempCtx = tempCanvas.getContext("2d");
+		 	  tempCtx.drawImage(tempEnemyImage, 0,j*30,40,30, 0,0,40,30);
+			  tabOffScreenCanvasEnemy.push(tempCanvas);
+		  }
+	}
+}
+*/
+
+var tabOffScreenCanvasEnemy = []
+var tempEnemyImage0;
+tempEnemyImage0 = new Image();
+tempEnemyImage0.src = "./assets/Enemy/HueShifted/eSpritesheet_40x30_hue1.png";
+tempEnemyImage0.onload = function(){
+		for(j=0;j<6;j++){
+		  var tempCanvas,tempCtx;
+		  tempCanvas = document.createElement("canvas");
+		  tempCanvas.setAttribute("id", "offscreenCanvas"+j);
+		  tempCanvas.setAttribute("height", 30);
+		  tempCanvas.setAttribute("width", 40);
+		  tempCtx = tempCanvas.getContext("2d");
+		  tempCtx.drawImage(tempEnemyImage0, 0,j*30,40,30, 0,0,40,30);
+		  tabOffScreenCanvasEnemy.push(tempCanvas);
+	  }
+}
+var tempEnemyImage1;
+tempEnemyImage1 = new Image();
+tempEnemyImage1.src = "./assets/Enemy/HueShifted/eSpritesheet_40x30_hue2.png";
+tempEnemyImage1.onload = function(){
+		for(j=0;j<6;j++){
+		  var tempCanvas,tempCtx;
+		  tempCanvas = document.createElement("canvas");
+		  tempCanvas.setAttribute("id", "offscreenCanvas"+j);
+		  tempCanvas.setAttribute("height", 30);
+		  tempCanvas.setAttribute("width", 40);
+		  tempCtx = tempCanvas.getContext("2d");
+		  tempCtx.drawImage(tempEnemyImage1, 0,j*30,40,30, 0,0,40,30);
+		  tabOffScreenCanvasEnemy.push(tempCanvas);
+	  }
+}
+var tempEnemyImage2;
+tempEnemyImage2 = new Image();
+tempEnemyImage2.src = "./assets/Enemy/HueShifted/eSpritesheet_40x30_hue3.png";
+tempEnemyImage2.onload = function(){
+		for(j=0;j<6;j++){
+		  var tempCanvas,tempCtx;
+		  tempCanvas = document.createElement("canvas");
+		  tempCanvas.setAttribute("id", "offscreenCanvas"+j);
+		  tempCanvas.setAttribute("height", 30);
+		  tempCanvas.setAttribute("width", 40);
+		  tempCtx = tempCanvas.getContext("2d");
+		  tempCtx.drawImage(tempEnemyImage2, 0,j*30,40,30, 0,0,40,30);
+		  tabOffScreenCanvasEnemy.push(tempCanvas);
+	  }
+}
+
 // Enemy
 var enemies = {
     init : function(){
@@ -202,12 +275,9 @@ function Enemy(x,y,speed,type){
     this.exists = true;
     this.height = 30;
     this.width = 40;
-    this.life = type;
+    this.life = type+1;
 	this.type = type;
-    this.img = new Image();
-    this.img.src = "./assets/Enemy/HueShifted/eSpritesheet_40x30_hue"+type+".png";
     this.cpt = 0;
-
     this.cptExplosion =  0;//10 images
     this.imgExplosion = new Image();
     this.imgExplosionHeight = 128;
@@ -215,6 +285,8 @@ function Enemy(x,y,speed,type){
     this.imgExplosion.src = "./assets/Explosion/explosionSpritesheet_1280x128.png";
 
     this.projectileSet = new ProjectileSet();
+	
+	//On ne fait exploser le vaisseau ennemi que si celui n'a plus de vie.
     this.explodes = function(){
     		this.life --;
     		if (this.life<=0) this.cptExplosion = 1;
@@ -245,7 +317,7 @@ function Enemy(x,y,speed,type){
         if(this.cptExplosion!=0){
                 conArena.drawImage(this.imgExplosion, this.cptExplosion*this.imgExplosionWidth, 0, this.imgExplosionWidth,this.imgExplosionHeight, this.x,this.y,this.width,this.height);
         }else{
-            conArena.drawImage(this.img,  0,this.cpt*this.height,this.width,this.height, this.x,this.y,this.width,this.height);
+            conArena.drawImage(tabOffScreenCanvasEnemy[6*this.type+this.cpt], this.x, this.y);
         }
     };
     this.clear = function(){
@@ -257,14 +329,15 @@ function Enemy(x,y,speed,type){
     this.update = function(){
        if(this.cptExplosion==0){//is not exploding
             this.x +=   this.xSpeed ;
+			//En fonction du type de l'ennemi, on calcule sa position.
 			switch(this.type){
-				case 1:
+				case 0:
 					this.y = this.yOrigine+ ArenaHeight/3 * Math.sin(this.x / 100);
 					break;
-				case 2:
+				case 1:
 					this.y = this.yOrigine+ ArenaHeight/10 * Math.sin(this.x / 25);
 					break;
-				case 3:
+				case 2:
 					this.y = this.yOrigine+ ArenaHeight/3 * Math.log(this.x / 100);
 					break;
 			}
@@ -291,7 +364,7 @@ function Enemy(x,y,speed,type){
     };
 }
 /////////////////////////////////
-
+//Création de powerups pour le joueur.
 var powerUps = {
     init : function(){
         this.tabPowerUps = new Array();
@@ -371,6 +444,7 @@ function PowerUp(x,y,speed,type){
             this.y = this.yOrigine;
             var tmp = this.collision([player]);
                 if(tmp != null){
+					//En fonction du type du powerup, on affecte les caractéristiques du joueur.
 					switch (this.type) {
 						case 1 : //améliore la vitesse du vaisseau.
 							console.log("vitesse !");
@@ -396,10 +470,23 @@ function PowerUp(x,y,speed,type){
 var player = {
     init : function(){
 		//Déclarations de canvas offscreen pour précharger les différentes étapes de l'animation du vaisseau:
-		this.offscreenCanvas = [];
-        this.img = new Image();
-        this.img.src = "./assets/Ship/Spritesheet_64x29.png";
-		this.img.onload = offScreenCreate(player);
+			this.offscreenCanvas = [];
+			this.imgReady = false;
+        	this.img = new Image();
+        	this.img.src = "./assets/Ship/Spritesheet_64x29.png";
+			this.img.onload = function(){
+				var tempCanvas,tempCtx;
+			  	for(i=0;i<4;i++){
+				  tempCanvas = document.createElement("canvas");
+				  tempCanvas.setAttribute("id", "offscreenCanvas"+i);
+				  tempCanvas.setAttribute("height", this.height);
+			 	  tempCanvas.setAttribute("width", this.width);
+			 	  tempCtx = tempCanvas.getContext("2d");
+			 	  tempCtx.drawImage(player.img, 0,i*player.height,player.width,player.height, 0,0,player.width,player.height);
+				  player.offscreenCanvas.push(tempCanvas);
+			  }
+			  player.imgReady = true;
+			};
         this.cpt = 0;
         this.cptExplosion =  10;//10 images
         this.imgExplosion = new Image();
@@ -407,7 +494,7 @@ var player = {
         this.imgExplosionWidth = 128;
         this.imgExplosion.src = "./assets/Explosion/explosionSpritesheet_1280x128.png";
         this.projectileSet = new ProjectileSet();
-		this.fireRate = 10; //Temps entre chaque tir.		  
+		  this.fireRate = 10; //Temps entre chaque tir.		  
     },
     x : 20,
     ySpeed : 5,
@@ -483,9 +570,7 @@ var player = {
         this.projectileSet.update();
     },
     draw : function(){
-        if(this.timeToBeAlive == 0) {
-
-            //conArena.drawImage(this.img, 0,this.cpt*this.height,this.width,this.height, this.x,this.y,this.width,this.height);
+        if(this.timeToBeAlive == 0 && this.imgReady) {
             conArena.drawImage(this.offscreenCanvas[this.cpt],this.x,this.y);
         }else{
             //exploding
@@ -509,10 +594,11 @@ function updateItems() {
     "use strict"; 
     player.update();
     tics++;
+	//Ajout aléatoire d'ennemis et de powerups.
      if(tics % 100 == 5) {
          var rand = Math.floor(Math.random() * ArenaHeight);
 
-        enemies.add(new Enemy(ArenaWidth, rand,-2,rand%3+1));
+        enemies.add(new Enemy(ArenaWidth, rand,-2,rand%3));
     }
 	if(tics % 500 == 10){
 		var rand = Math.floor(Math.random() * ArenaHeight);
@@ -633,16 +719,3 @@ window.addEventListener("keyup", keyUpHandler, false);
 }
 
 window.addEventListener("load", init, false);
-
-function offScreenCreate(object){
-	var tempCanvas,tempCtx;
-		  for(i=0;i<4;i++){
-			  tempCanvas = document.createElement("canvas");
-			  tempCanvas.setAttribute("id", "offscreenCanvas"+i);
-			  tempCanvas.setAttribute("height", object.height);
-		 	  tempCanvas.setAttribute("width", object.width);
-		 	  tempCtx = tempCanvas.getContext("2d");
-		 	  tempCtx.drawImage(object.img, 0,i*object.height,object.width,object.height, 0,0,object.width,object.height)
-			  object.offscreenCanvas.push(tempCanvas);
-		  }
-}
